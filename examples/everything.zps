@@ -1,0 +1,70 @@
+// Zpeedy Script language showcase
+display "Zpeedy Script showcase"
+
+// Values, variables, lists and arithmetic
+set name to "Jamie"
+set enabled to true
+set missingValue to null
+set unknownValue to undefined
+set startingNumber to 5
+set doubledNumber to startingNumber times 2
+set increasedNumber to doubledNumber plus 3
+set calculatedNumber to increasedNumber minus 1
+set animals to ["Dog", "Cat", "Fox"]
+
+display name
+display enabled
+display missingValue
+display unknownValue
+display calculatedNumber
+display animals
+
+// Indentation-based conditions
+if calculatedNumber is greater than 20 then
+  display "The result is greater than twenty"
+alternatively if calculatedNumber is at least 12 then
+  display "The result is at least twelve"
+alternatively if calculatedNumber is not 12 then
+  display "The result is not twelve"
+otherwise
+  display "The result is twelve"
+
+// Cached value selection
+set colour to "amber"
+when colour
+  is "red" then
+    display "Stop"
+  is "amber" then
+    display "Wait"
+  is "green" then
+    display "Go"
+  otherwise
+    display "Unknown colour"
+
+// Boolean value selection
+when enabled
+  is true then
+    display "The program is enabled"
+  is false then
+    display "The program is disabled"
+
+// Iterate over every list value
+for every animal in animals
+  display animal
+
+// Conditional loop
+set counter to 0
+loop while counter is less than 3
+  display counter
+  set counter to counter plus 1
+
+// Fixed repetition
+repeat 2 times
+  display "Repeated"
+
+// An indefinite loop can be stopped explicitly
+repeat forever
+  display "The forever loop ran once"
+  stop loop
+
+display "Showcase complete"

@@ -1,0 +1,6 @@
+set x to 10
+
+if x is 10 then
+  display "Yes"
+otherwise
+  display "No"

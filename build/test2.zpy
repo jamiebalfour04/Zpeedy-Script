@@ -1,0 +1,22 @@
+set animals to ["Dog", "Cat", "Fox"]
+
+for every animal in animals
+  display animal
+
+set x to 0
+
+while x is less than 3
+  display x
+  set x to x plus 1
+
+if x is 3 then
+  display "Finished"
+otherwise
+  display "Something went wrong"
+
+repeat 2 times
+  display "Again"
+
+repeat forever
+  display "Once"
+  stop loop
