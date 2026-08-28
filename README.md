@@ -1,5 +1,10 @@
 # Zpeedy Script
 
+Zpeedy Script was started on 1 June 2026 as a side project to test the ZPE runtime's new features. 
+
+This version you have here is built around the new ZPECompilerBytecodeBuilder and was rebuilt in early August and then
+tidied up with AI.
+
 Zpeedy is an indentation-based descriptive language that compiles through
 `ZPECompilerBytecodeBuilder` and executes on the ZPE runtime.
 
