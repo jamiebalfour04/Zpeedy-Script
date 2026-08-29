@@ -1,11 +1,46 @@
-// Zpeedy Script language showcase
-display "Zpeedy Script showcase"
+# Zpeedy Script language showcase
+display "Zpeedy Script showcase" # Inline comments also use the hash symbol
 
-// Values, variables, lists and arithmetic
+# Named object shapes and structure-backed instances
+thing Person
+  has name
+  has age
+
+thing Employee is a Person
+  has role
+
+jamiePerson is Person with
+  name as "Jamie"
+  age as 34
+display jamiePerson
+
+developer is Employee with
+  name as "Jamie"
+  age as 34
+  role as "Developer"
+display developer
+
+# Public routines, parameters, calls and returned values
+routine displayGreeting takes person
+  display person
+
+routine double takes number
+  give back number * 2
+
+routine add takes firstNumber, secondNumber
+  give back firstNumber + secondNumber
+
+call displayGreeting with "Jamie"
+set doubledByRoutine to call double with 10
+set totalFromRoutine to call add with 10, 20
+display doubledByRoutine
+display totalFromRoutine
+
+# Values, variables, lists and arithmetic
 set name to "Jamie"
 set enabled to true
-set missingValue to null
-set unknownValue to undefined
+set missingValue to nothing
+set unknownValue to unknown
 set startingNumber to 5
 set doubledNumber to startingNumber times 2
 set increasedNumber to doubledNumber plus 3
@@ -16,10 +51,14 @@ display name
 display enabled
 display missingValue
 display unknownValue
+display [nothing, unknown]
 display calculatedNumber
 display animals
 
-// Indentation-based conditions
+if missingValue is nothing then
+  display "nothing remains null underneath"
+
+# Indentation-based conditions
 if calculatedNumber is greater than 20 then
   display "The result is greater than twenty"
 alternatively if calculatedNumber is at least 12 then
@@ -29,8 +68,16 @@ alternatively if calculatedNumber is not 12 then
 otherwise
   display "The result is twelve"
 
-// Cached value selection
+# Cached value selection
 set colour to "amber"
+set instruction to choice based on colour
+  "red" gives "Stop"
+  "amber" gives "Wait"
+  "green" gives "Go"
+  otherwise gives "Unknown colour"
+display instruction
+
+# Statement selection
 when colour
   is "red" then
     display "Stop"
@@ -41,30 +88,36 @@ when colour
   otherwise
     display "Unknown colour"
 
-// Boolean value selection
+# Boolean value selection
 when enabled
   is true then
     display "The program is enabled"
   is false then
     display "The program is disabled"
 
-// Iterate over every list value
+# Iterate over every list value
 for every animal in animals
   display animal
 
-// Conditional loop
+# Conditional loop
 set counter to 0
-loop while counter is less than 3
+while counter is less than 3 do
   display counter
   set counter to counter plus 1
 
-// Fixed repetition
+# Fixed repetition
 repeat 2 times
   display "Repeated"
 
-// An indefinite loop can be stopped explicitly
+# An indefinite loop can be stopped explicitly
 repeat forever
   display "The forever loop ran once"
   stop loop
+
+# Protected execution with an error-message handler
+attempt
+  display "The attempted operation succeeded"
+otherwise on error message
+  display message
 
 display "Showcase complete"

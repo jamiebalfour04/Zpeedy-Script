@@ -8,6 +8,7 @@ import java.util.ArrayList;
 /** Defines Zpeedy's vocabulary for the Zenith Parsing Engine. */
 final class ZpeedyTokeniser implements Tokeniser {
 
+  // These are Zpeedy tokens and not ZPE byte codes
   static final byte IDENTIFIER = 1;
   static final byte INTEGER = 2;
   static final byte DECIMAL = 3;
@@ -50,10 +51,27 @@ final class ZpeedyTokeniser implements Tokeniser {
   static final byte ATTEMPT = 40;
   static final byte ON = 41;
   static final byte ERROR = 42;
+  static final byte DIVIDE = 43;
+  static final byte ROUTINE = 44;
+  static final byte TAKES = 45;
+  static final byte CALL = 46;
+  static final byte WITH = 47;
+  static final byte GIVE = 48;
+  static final byte BACK = 49;
+  static final byte CHOICE = 50;
+  static final byte BASED = 51;
+  static final byte GIVES = 52;
+  static final byte THING = 53;
+  static final byte HAS = 54;
+  static final byte A = 55;
+  static final byte AS = 56;
+  static final byte DO = 57;
 
   @Override
   public byte stringToByteCode(String word) {
     if (word == null || word.isEmpty()) return -2;
+
+    // Operators can be written as words or symbols
     switch (word) {
       case "set": return SET;
       case "to": return TO;
@@ -74,10 +92,12 @@ final class ZpeedyTokeniser implements Tokeniser {
       case "continue": return CONTINUE;
       case "true": return TRUE;
       case "false": return FALSE;
-      case "null": return NULL;
-      case "undefined": return UNDEFINED;
-      case "plus": return PLUS;
-      case "minus": return MINUS;
+      case "nothing": return NULL;
+      case "unknown": return UNDEFINED;
+      case "plus":
+      case "+": return PLUS;
+      case "minus":
+      case "-": return MINUS;
       case "less": return LESS;
       case "than": return THAN;
       case "greater": return GREATER;
@@ -88,12 +108,30 @@ final class ZpeedyTokeniser implements Tokeniser {
       case "[": return LIST_OPEN;
       case "]": return LIST_CLOSE;
       case ",": return COMMA;
+      case "*": return TIMES;
+      case "divide":
+      case "/": return DIVIDE;
       case "when": return WHEN;
       case "alternatively": return ALTERNATIVELY;
       case "attempt": return ATTEMPT;
       case "on": return ON;
       case "error": return ERROR;
+      case "routine": return ROUTINE;
+      case "takes": return TAKES;
+      case "call": return CALL;
+      case "with": return WITH;
+      case "give": return GIVE;
+      case "back": return BACK;
+      case "choice": return CHOICE;
+      case "based": return BASED;
+      case "gives": return GIVES;
+      case "thing": return THING;
+      case "has": return HAS;
+      case "a": return A;
+      case "as": return AS;
+      case "do": return DO;
       default:
+        // If the word is not a keyword then check for a value or identifier
         if (word.charAt(0) == '"') return STRING;
         if (word.matches("[+-]?\\d+")) return INTEGER;
         if (word.matches("[+-]?(?:\\d+\\.\\d*|\\d*\\.\\d+)")) return DECIMAL;
@@ -108,7 +146,8 @@ final class ZpeedyTokeniser implements Tokeniser {
 
   @Override
   public String delimiterCharacters() {
-    return " [],\r\n\t";
+    // Newlines are needed by the analyser to work out indentation
+    return " [],+-*/\r\n\t";
   }
 
   @Override
@@ -134,7 +173,9 @@ final class ZpeedyTokeniser implements Tokeniser {
   @Override
   public ArrayList<ZPEComment> listOfComments() {
     ArrayList<ZPEComment> comments = new ArrayList<>();
-    comments.add(new ZPEComment("//", "\n"));
+
+    // Zpeedy comments start with # and finish at the end of the line
+    comments.add(new ZPEComment("#", "\n"));
     return comments;
   }
 }

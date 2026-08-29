@@ -29,6 +29,7 @@ final class ZpeedyInstaller {
   }
 
   static void install(String memory) throws IOException {
+    // Install the JAR which is currently running
     Path sourceJar = runningJar();
     Path installationDirectory = HelperFunctions.getAppDataDirectory(
         "jamiebalfour/zpeedy", System.getProperty("user.home") + "/jb/zpeedy").toPath();
@@ -50,6 +51,7 @@ final class ZpeedyInstaller {
       Path location = Paths.get(Zpeedy.class.getProtectionDomain().getCodeSource().getLocation().toURI())
           .toAbsolutePath().normalize();
       if (!Files.isRegularFile(location) || !location.getFileName().toString().endsWith(".jar")) {
+        // The installer only works from the packaged JAR and not the IDE
         throw new IOException("Zpeedy installation must be run from the packaged zpeedy.jar file.");
       }
       return location;
@@ -60,7 +62,10 @@ final class ZpeedyInstaller {
 
   private static String normaliseMemory(String memory) {
     if (memory == null || memory.isBlank()) return DEFAULT_MEMORY;
+
     String value = memory.trim().toUpperCase(Locale.ROOT);
+
+    // A number without a suffix is treated as megabytes
     if (value.matches("[1-9]\\d*")) return value + "M";
     if (value.matches("[1-9]\\d*[MG]")) return value;
     return DEFAULT_MEMORY;
@@ -79,6 +84,8 @@ final class ZpeedyInstaller {
     }
 
     Path launcher = targetDirectory.resolve(windows ? "zpeedy.cmd" : "zpeedy");
+
+    // Install the correct launcher for the operating system
     if (windows) {
       atomicWrite(launcher, windowsLauncher(jar, memory));
     } else {
@@ -87,6 +94,7 @@ final class ZpeedyInstaller {
         Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxr-xr-x");
         Files.setPosixFilePermissions(launcher, permissions);
       } catch (UnsupportedOperationException exception) {
+        // Some filesystems do not support POSIX permissions
         if (!launcher.toFile().setExecutable(true, false)) {
           throw new IOException("Could not make the zpeedy launcher executable: " + launcher);
         }
@@ -107,7 +115,7 @@ final class ZpeedyInstaller {
       try {
         paths.add(Paths.get(value));
       } catch (InvalidPathException ignored) {
-        // Ignore malformed PATH entries.
+        // Ignore this entry and try the rest of PATH
       }
     }
     for (Path path : paths) {
@@ -117,6 +125,7 @@ final class ZpeedyInstaller {
   }
 
   private static String unixLauncher(Path jar, String memory) {
+    // Memory can be changed for one run without reinstalling Zpeedy
     return "#!/bin/sh\n"
         + "MEMORY=\"" + escapeForShell(memory) + "\"\n"
         + "if [ \"$1\" = \"--zpeedy-memory\" ]; then\n"
@@ -148,12 +157,14 @@ final class ZpeedyInstaller {
   }
 
   private static void atomicWrite(Path target, String content) throws IOException {
+    // Write a temporary launcher before replacing the old one
     Path temporary = target.getParent().resolve(target.getFileName() + ".tmp_" + UUID.randomUUID());
     Files.write(temporary, content.getBytes(StandardCharsets.UTF_8),
         StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
     try {
       Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     } catch (AtomicMoveNotSupportedException exception) {
+      // Fall back to a normal move when atomic moves are not supported
       Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
     }
   }

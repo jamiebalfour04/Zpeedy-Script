@@ -1,0 +1,414 @@
+ZPE/YASS formal specification update
+ZPE 1.14.9 (Spurriergate, September 2026)
+
+The following productions replace or extend the corresponding productions in
+the existing formal specification.
+
+
+1. Tokens and modifiers
+-----------------------
+
+⟨scope_resolution_operator⟩ ::= ::
+⟨object_access_operator⟩    ::= ->
+⟨inheritance_keyword⟩       ::= inherits | extends
+⟨scope⟩                     ::= public | private | protected | friendly
+⟨static_modifier⟩           ::= static
+⟨method_modifiers⟩          ::= ⟨scope⟩ ⟨static_modifier⟩
+                              | ⟨scope⟩
+                              | ⟨static_modifier⟩
+                              | ε
+
+
+2. Body and expression forms
+----------------------------
+
+Replace ⟨body⟩ with:
+
+⟨body⟩ ::= ⟨assert⟩
+         | ⟨import⟩
+         | ⟨includes⟩
+         | ⟨assign⟩
+         | ⟨function⟩
+         | ⟨if⟩
+         | ⟨for⟩
+         | ⟨for_to⟩
+         | ⟨for_each⟩
+         | ⟨until⟩
+         | ⟨while⟩
+         | ⟨do_while⟩
+         | ⟨when⟩
+         | ⟨lambda_call⟩
+         | ⟨function_call⟩
+         | ⟨try⟩
+         | ⟨object_accessor⟩
+         | ⟨scope_resolution⟩
+         | ⟨increment⟩
+         | ⟨decrement⟩
+         | ⟨module⟩
+         | ⟨structure⟩
+         | ⟨record⟩
+         | ⟨return⟩
+         | ⟨break⟩
+         | ⟨label⟩
+         | ⟨goto⟩
+         | ⟨breakpoint⟩
+         | ⟨scope_block⟩
+
+Replace ⟨term⟩ with:
+
+⟨term⟩ ::= ⟨identifier⟩
+         | ⟨variable⟩
+         | ⟨increment⟩
+         | ⟨decrement⟩
+         | ⟨value⟩
+         | ⟨lambda_call⟩
+         | ⟨function_call⟩
+         | ⟨object_accessor⟩
+         | ⟨scope_resolution⟩
+         | ⟨power⟩
+         | ⟨match_expression⟩
+         | ⟨matcher_expression⟩
+         | ⟨conditional_expression⟩
+         | ⟨count⟩
+         | ⟨cast⟩
+         | ( ⟨expression⟩ )
+
+
+3. Functions and methods
+------------------------
+
+The existing ⟨function⟩ production continues to describe an ordinary function:
+
+⟨function⟩ ::= function ⟨identifier⟩ ( ⟨formal_parameters⟩ )
+               ⟨function_type⟩ ⟨construct_body⟩ end function
+             | function ⟨identifier⟩ ( ⟨formal_parameters⟩ )
+               ⟨function_type⟩ { ⟨construct_body⟩ }
+
+A method is a function declared as a structure member. It may carry an access
+scope and may be static:
+
+⟨method⟩ ::= ⟨method_modifiers⟩ function ⟨identifier⟩
+             ( ⟨formal_parameters⟩ ) ⟨function_type⟩
+             ⟨construct_body⟩ end function
+           | ⟨method_modifiers⟩ function ⟨identifier⟩
+             ( ⟨formal_parameters⟩ ) ⟨function_type⟩
+             { ⟨construct_body⟩ }
+
+Examples accepted by this production:
+
+public function describe()
+public static function get_people_list()
+private function calculate_value(number value) : number
+
+
+4. Instance and inherited-member access
+----------------------------------------
+
+Replace ⟨object_accessor⟩ with:
+
+⟨object_root⟩      ::= ⟨variable⟩ | this | super
+⟨object_member⟩    ::= ⟨variable⟩
+                     | ⟨identifier⟩
+                     | ⟨function_call⟩
+                     | ⟨lambda_call⟩
+⟨object_accessor⟩  ::= ⟨object_root⟩ ⟨object_access_operator⟩ ⟨object_member⟩
+                     | ⟨object_accessor⟩ ⟨object_access_operator⟩ ⟨object_member⟩
+
+This admits, amongst other existing forms:
+
+$person->$name
+$person->describe()
+this->$name
+super->describe()
+super->save($path)
+
+
+5. Static and module-member access
+----------------------------------
+
+Add:
+
+⟨scope_resolution_root⟩   ::= ⟨identifier⟩
+⟨scope_resolution_member⟩ ::= ⟨identifier⟩
+                            | ⟨variable⟩
+                            | ⟨function_call⟩
+⟨scope_resolution⟩        ::= ⟨scope_resolution_root⟩
+                              ⟨scope_resolution_operator⟩
+                              ⟨scope_resolution_member⟩
+
+This production is shared by modules and structures:
+
+jamieb::whoami()
+jamieb::fullname
+PersonObject::get_people_list()
+
+
+6. Structures and inheritance
+-----------------------------
+
+Replace the existing ⟨inherits⟩ production. The old production incorrectly uses
+the singular keyword "inherit".
+
+⟨inherits⟩ ::= ⟨inheritance_keyword⟩ ⟨identifier⟩ | ε
+
+Replace ⟨structure_member⟩ with:
+
+⟨structure_member⟩ ::= ⟨variable⟩
+                     | ⟨assign⟩
+                     | ⟨method⟩
+
+The surrounding structure productions remain:
+
+⟨structure_inner⟩ ::= ⟨structure_member⟩ ⟨structure_inner⟩ | ε
+⟨structure_id⟩    ::= structure | struct | class
+⟨structure⟩       ::= ⟨structure_id⟩ ⟨identifier⟩ ⟨inherits⟩
+                      ⟨namespace⟩ ⟨structure_inner⟩ end structure
+                    | ⟨structure_id⟩ ⟨identifier⟩ ⟨inherits⟩
+                      { ⟨namespace⟩ ⟨structure_inner⟩ }
+
+Examples accepted by these productions:
+
+structure Dog inherits Animal
+structure Dog extends Animal
+
+
+7. Inline conditional expressions
+---------------------------------
+
+Add:
+
+⟨conditional_expression⟩ ::= ⟨term⟩ if ⟨condition⟩ else ⟨term⟩
+
+The expression before if is returned when the condition is true. The expression
+after else is returned when the condition is false:
+
+$result = "Yes" if $number > 5 else "No"
+print("Adult" if $age >= 18 else "Child")
+
+Only the selected result expression is evaluated.
+
+Inline conditional expressions cannot be chained. In particular, the following
+form is invalid:
+
+$size = "large" if $n > 10 else "medium" if $n > 5 else "small"
+
+Use an ordinary if statement, a match expression, or a matcher when more than
+one condition is required. The established ? ternary syntax remains valid and
+both forms compile to the same TERNARY IAST representation.
+
+
+8. Reusable matcher expressions
+-------------------------------
+
+Add:
+
+⟨matcher_key⟩        ::= ⟨string⟩
+                       | ⟨integer⟩
+                       | ⟨real⟩
+                       | ⟨boolean⟩
+                       | null
+                       | - ⟨number⟩
+⟨matcher_entry⟩      ::= ⟨matcher_key⟩ => ⟨expression⟩ ;
+⟨matcher_entries⟩    ::= ⟨matcher_entry⟩ ⟨matcher_entries⟩ | ε
+⟨matcher_default⟩    ::= else => ⟨expression⟩ ; | ε
+⟨matcher_expression⟩ ::= matcher ( ⟨matcher_entries⟩ ⟨matcher_default⟩ )
+
+A matcher expression creates a reusable, first-class callable value:
+
+$status = matcher(
+  200 => "OK";
+  404 => "Not found";
+  500 => "Server error";
+  else => "Unknown";
+)
+
+print($status(404))
+
+Calling a matcher supplies its single implicit input value. Matcher keys must be
+literals, and duplicate keys are compile-time errors. Result expressions are
+stored in compiled form and only the selected expression is evaluated. Result
+expressions may capture values from the surrounding lexical scope.
+
+The else entry is optional. A matcher returns null when no key matches and no
+else entry is present. Resolved inputs, including misses, may be cached for
+subsequent calls without changing YASS equality semantics.
+
+
+9. Indentation-based block syntax
+---------------------------------
+
+Add:
+
+
+10. Feature-gated interfaces and implementation contracts
+----------------------------------------------------------
+
+The following productions are implemented behind the release feature
+ENABLE_INTERFACES. In ZPE 1.14.9 the feature is disabled; encountering either
+interface or implements is a compilation error. A later release may enable the
+same grammar without changing its syntax.
+
+⟨interface_method⟩ ::= public function ⟨identifier⟩
+                       ( ⟨formal_parameters⟩ ) ⟨function_type⟩
+⟨interface_inner⟩  ::= ⟨interface_method⟩ ⟨interface_inner⟩ | ε
+⟨interface⟩        ::= interface ⟨identifier⟩
+                       ⟨interface_inner⟩ end interface
+                     | interface ⟨identifier⟩
+                       { ⟨interface_inner⟩ }
+
+Interface methods are declarations only. They have no body and must not be
+followed by end function. Interfaces declare public instance-method contracts;
+they do not declare fields, constructors, static methods or default bodies.
+
+⟨implements⟩ ::= implements ⟨identifier⟩
+                 | implements ⟨identifier⟩ , ⟨implements⟩
+                 | ε
+
+The structure header therefore becomes:
+
+⟨structure⟩ ::= ⟨structure_id⟩ ⟨identifier⟩ ⟨inherits⟩ ⟨implements⟩
+                ⟨namespace⟩ ⟨structure_inner⟩ end structure
+              | ⟨structure_id⟩ ⟨identifier⟩ ⟨inherits⟩ ⟨implements⟩
+                { ⟨namespace⟩ ⟨structure_inner⟩ }
+
+Examples:
+
+interface Named
+  public function name() : string
+end interface
+
+structure Dog inherits Animal implements Named, Describable
+
+A structure that declares implements must satisfy every interface method
+contract. Compliance is a compile-time requirement; runtime validation remains
+as a safeguard for dynamically loaded compiled programs. An interface name is
+also a nominal object type and may be used in TYPO variables, parameters and
+return declarations.
+
+
+11. Nominal relationship expressions
+------------------------------------
+
+Add the following boolean expression forms:
+
+⟨inherits_expression⟩   ::= ⟨identifier⟩ inherits ⟨identifier⟩
+⟨implements_expression⟩ ::= ⟨term⟩ implements ⟨identifier⟩
+
+The first expression checks whether the left nominal structure type derives
+from the requested parent type. The second checks whether an object, or its
+structure type, satisfies the named interface contract. These words remain
+valid in a structure header, where they retain their declaration meanings.
+
+Dog inherits Animal
+$dog implements Named
+
+Both expressions return a boolean. A type does not inherit itself; an object
+implements an interface through its own structure or any ancestor structure.
+
+⟨indented_header⟩ ::= if ⟨condition⟩ :
+                    | else if ⟨condition⟩ :
+                    | elseif ⟨condition⟩ :
+                    | else :
+                    | for ⟨for_header⟩ :
+                    | while ⟨condition⟩ :
+                    | function ⟨function_header⟩ :
+                    | class ⟨identifier⟩ ⟨inherits⟩ :
+                    | structure ⟨identifier⟩ ⟨inherits⟩ :
+                    | module ⟨identifier⟩ :
+                    | switch ⟨switch_header⟩ :
+                    | try :
+                    | catch ⟨catch_header⟩ :
+                    | finally :
+
+⟨indented_block⟩ ::= ⟨indented_header⟩ NEWLINE INDENT
+                     ⟨construct_body⟩ DEDENT
+
+Colon-terminated recognised headers may omit their explicit end clause. A block
+begins when the following non-empty statement is indented and ends on a complete
+dedent to the header's indentation level. Nested indentation is supported.
+
+Tabs count as four spaces. After the first statement establishes a block's body
+indentation, later statements must use that indentation or perform a complete
+dedent; partial dedents are compilation errors.
+
+Continuation clauses must align with their opening header. else and elseif
+continue an if block; catch and finally continue a try block. Blank lines,
+comments, and escaped continuation lines do not close indentation blocks.
+Explicit end clauses remain accepted.
+
+For function declarations, the final colon is the indentation-block delimiter
+and does not declare an empty return-type list. A typed indented function places
+another colon after its return type:
+
+function describe() : string:
+  return "Description"
+
+Example:
+
+function classify($number):
+  if $number > 10:
+    return "large"
+  else:
+    return "small"
+
+
+10. Match and selection execution
+---------------------------------
+
+The comparator of a match expression is evaluated once. Candidate expressions
+are tested in source order using ordinary YASS equality. Only the result of the
+first matching candidate is evaluated.
+
+The else expression is evaluated lazily, only after every candidate fails.
+
+When-is and switch-case statements retain first-branch-wins behaviour. Their
+compiled branch list may acquire a transient runtime lookup cache so repeated
+selection avoids a linear scan. This cache is not part of the serialised IAST
+format and does not alter source order, duplicate handling, or fallback
+behaviour.
+
+
+11. Semantic constraints
+------------------------
+
+1. A static method belongs to its declaring structure and is not copied to
+   instances created from that structure.
+
+2. A static method called from outside its declaring structure must be public.
+
+3. A static method is called with the scope-resolution operator:
+
+   PersonObject::get_people_list()
+
+4. No object is constructed for a static call. Consequently, this and instance
+   properties are unavailable within a static method.
+
+5. super is valid only within an instance method of a structure that has an
+   inherited parent implementation available for the requested method.
+
+6. super->method() begins method lookup at the parent of the current structure.
+   It does not dynamically dispatch back to the overriding child method.
+
+7. The inherited method operates on the current child instance. References to
+   this inside the inherited implementation therefore access the child object.
+
+8. Arguments in a super call follow the ordinary ⟨actual_parameters⟩ grammar.
+
+9. Private parent methods cannot be invoked through super.
+
+10. The inherits and extends keywords are grammatically equivalent declarations
+    of a structure's parent.
+
+
+Availability
+------------
+
+Inheritance has existed in ZPE for a long time. Its implementation was
+substantially overhauled in ZPE 1.14.9.
+
+The super expression and static structure methods were made available in
+ZPE 1.14.9 (Spurriergate, September 2026).
+
+Indentation-based block syntax, the alternative inline conditional syntax,
+reusable matcher expressions, lazy match fallbacks, and cached when-is/switch
+dispatch were added or formalised in ZPE 1.14.9.

@@ -9,9 +9,11 @@ public final class ZpeedyCompiler {
   private final ZpeedyBytecodeAnalyser analyser;
 
   public ZpeedyCompiler() {
+    // Use ZPE's byte code builder by default
     this(new ZPECompilerBytecodeBuilder());
   }
 
+  // Allows tools such as ZIDE to provide their own byte code builder
   public ZpeedyCompiler(ZPECompilerBytecodeBuilder bytecodeBuilder) {
     analyser = new ZpeedyBytecodeAnalyser(bytecodeBuilder);
   }
@@ -20,6 +22,7 @@ public final class ZpeedyCompiler {
     try {
       return analyser.analyse(source);
     } catch (ZpeedyBytecodeAnalyser.ZpeedyCompileException exception) {
+      // Convert the internal error to the public compiler error
       throw new ZpeedyCompileException(exception.getLine(), exception.getDetail());
     }
   }
